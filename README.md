@@ -88,6 +88,7 @@ sudo ./build.sh
 - [Installation Instructions](#installation-instructions)
   - [Install instructions using DKMS](#install-instructions-using-dkms)
   - [Installing on TrueNAS Scale](#installing-on-truenas-scale)
+    - [Compiling using Kylian's Docker container](#compiling-using-kylians-docker-container)
     - [Install Procedure](#install-procedure)
     - [Uninstall procedure](#uninstall-procedure)
   - [Installing on fnOS (Feiniu OS / 飞牛 OS)](#installing-on-fnos-feiniu-os--飞牛-os)
@@ -144,11 +145,18 @@ Before installing, please check the *Supported Models* table and see that your d
 5. Ensure the module is installed using `dkms status`
 
 ### Installing on TrueNAS Scale 
-> **❗Important**: TrueNAS Scale is a highly restricted operating system that does not support modifications to the host OS environment. To add this module, you must enable **Developer Mode**, which allows installation of build tools and modification of the root filesystem to include the kernel module. However, enabling Developer Mode voids official support from iXsystems on their support platforms. For more information, refer to the [TrueNAS documentation](https://www.truenas.com/docs/scale/scaletutorials/systemsettings/advanced/developermode/).  
 
 > **❗Important**: Updates to the TrueNAS OS will overwrite any changes made during the installation of this module, requiring the installation process to be repeated.
 
+#### Compiling using Kylian's Docker container
+
+Visit https://github.com/kylian-002/Truenas-qnap8528-module and follow the instructions to build the module.
+This method has the benefit that it does not require a local shell and does not require enabling TrueNAS "Developer-Mode"
+> Note: The repository and code linked above in this section are not controlled by me and should be verified independently.
+
 #### Install Procedure
+> **❗Important**: TrueNAS Scale is a highly restricted operating system that does not support modifications to the host OS environment. To add this module, you must enable **Developer Mode**, which allows installation of build tools and modification of the root filesystem to include the kernel module. However, enabling Developer Mode voids official support from iXsystems on their support platforms. For more information, refer to the [TrueNAS documentation](https://www.truenas.com/docs/scale/scaletutorials/systemsettings/advanced/developermode/).  
+
 1. Connect to TrueNAS either by using the web console, SSH or the local Linux shell.
 2. using `sudo install-dev-tools` disable the read protection on the root filesystem and install required tools.
 3. Download the latest source tarball from the [release page](https://github.com/0xGiddi/tsx73a-ec/releases/latest) and extract using `tar xzf <filename>`.
@@ -503,6 +511,11 @@ TS-1264U|Q08R0|Q08X0|12/12 | ⚠️ See *2
 |TVS-473e|QY030|QY040|6/6 | ⚠️ See *5
 |TVS-873e|QY030|QY060|10/10 |
 |TVS-673e|QY030|QY050|8/8 |
+|TS-473|QY032|QY040|6/6 |  
+|TS-873|QY031|QY060|10/10 |  
+|TS-673|QY032|QY050|8/8 |  
+|TS-673|QY031|QY050|8/8 |  
+|TS-473|QY031|QY040|6/6 |
 
 
 *1 Some or all disks LEDs are managed by other hardware (not the EC), if the model is missing 2 disks (e.g `8/10`), it's most likely the internal M.2/NVME ports that do not have an LED associated with them.\
