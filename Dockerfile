@@ -1,4 +1,5 @@
-FROM debian:bookworm AS builder
+ARG DEBIAN_VERSION=bookworm
+FROM debian:${DEBIAN_VERSION} AS builder
 RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources
 
 # 安装编译工具（GCC、make、内核头文件构建依赖）

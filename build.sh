@@ -7,6 +7,7 @@ SOURCE_CODE_DIR="./src"
 MODULE_OUTPUT_DIR="/lib/modules/$(uname -r)/extra"
 KERNEL_VERSION=$(uname -r)
 KERNEL_HEADERS_DIR="/usr/src/linux-headers-$KERNEL_VERSION"
+DEBIAN_VERSION=$(cat /etc/debian_version | cut -d. -f1)
 
 # === 前置检查 ===
 # 检查 Docker 服务状态
@@ -18,14 +19,14 @@ fi
 # 检查内核头文件是否存在
 if [ ! -d "$KERNEL_HEADERS_DIR" ]; then
     echo "❌ 错误：未找到内核头文件 $KERNEL_HEADERS_DIR"
-    echo "📦 请先安装对应版本的内核开发包（通常为 linux-headers-$KERNEL_VERSION）"
+    echo "📦 请先安装对应版本的内核开发包（通常为 linux-headers-$KERNEL_VERSION, PVE下为proxmox-headers-$KERNEL_VERSION）"
     exit 1
 fi
 
 # === 镜像管理 ===
 build_image() {
     echo "🔄 正在构建 Docker 镜像 ($IMAGE_NAME)..."
-    docker build -t "$IMAGE_NAME" -f Dockerfile .
+    docker build --build-arg DEBIAN_VERSION="$DEBIAN_VERSION" -t "$IMAGE_NAME" -f Dockerfile .
     if [ $? -ne 0 ]; then
         echo "❌ 镜像构建失败，请检查 Dockerfile 或网络连接"
         exit 1
@@ -82,15 +83,15 @@ compile_driver() {
 # === 安装流程 ===
 install_driver() {
     echo "📦 安装驱动到系统..."
-    sudo mkdir -p "$MODULE_OUTPUT_DIR"
-    sudo cp "$SOURCE_CODE_DIR"/*.ko "$MODULE_OUTPUT_DIR"
-    sudo depmod -a
+    mkdir -p "$MODULE_OUTPUT_DIR"
+    cp "$SOURCE_CODE_DIR"/*.ko "$MODULE_OUTPUT_DIR"
+    depmod -a
     local driver_name=$(basename "$SOURCE_CODE_DIR"/*.ko .ko)
-    sudo modprobe "$driver_name"
+    modprobe "$driver_name"
     echo "✅ 驱动 $driver_name 已加载"
     
     # 配置 systemd 开机自启（替代旧的 /etc/modules-load.d 方式）
-    cat <<EOF | sudo tee /etc/systemd/system/qnap8528-load.service >/dev/null
+    cat <<EOF | tee /etc/systemd/system/qnap8528-load.service >/dev/null
 [Unit]
 Description=Load qnap8528 Kernel Module
 After=syslog.target network.target
@@ -104,7 +105,7 @@ ExecStop=/sbin/modprobe -r $driver_name
 [Install]
 WantedBy=multi-user.target
 EOF
-    sudo systemctl enable --now qnap8528-load.service >/dev/null
+    systemctl enable --now qnap8528-load.service >/dev/null
     echo "⚙️ 已配置开机自动加载"
 }
 
